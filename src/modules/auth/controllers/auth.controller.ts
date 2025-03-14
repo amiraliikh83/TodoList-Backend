@@ -1,8 +1,18 @@
-import { Body, Controller, Post, HttpCode, HttpStatus, Get, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Post,
+  HttpCode,
+  HttpStatus,
+  Get,
+  UseGuards,
+  Request,
+} from '@nestjs/common';
 import { AuthService } from '../services/auth.service';
 import { CreateUserDto } from '../../dto/create-user.dto';
 import { LoginUserDto } from '../../dto/login-user.dto';
 import { ApiTags, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import { JwtAuthGuard } from 'src/modules/Guard/JwtAuthGuard';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -40,5 +50,4 @@ export class AuthController {
   validateToken(@Request() req): { message: string; user: any } {
     return { message: 'Token is valid.', user: req.user };
   }
-}
 }
