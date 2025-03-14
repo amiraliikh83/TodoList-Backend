@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException, UnauthorizedException } from '@nestjs/common';
+import { Injectable, BadRequestException, UnauthorizedException, HttpStatus } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User, UserDocument } from '../../schemas/user.schema';
@@ -29,7 +29,7 @@ export class AuthService {
     await newUser.save();
   }
 
-  async login(loginUserDto: LoginUserDto): Promise<{ accessToken: string }> {
+  async login(loginUserDto: LoginUserDto): Promise<{ accessToken: string  , statusCode : number}> {
     const user = await this.userModel.findOne({ username: loginUserDto.username });
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
@@ -43,6 +43,6 @@ export class AuthService {
     const payload = { username: user.username, sub: user._id };
     const accessToken = this.jwtService.sign(payload);
 
-    return { accessToken };
+    return { accessToken  , statusCode : HttpStatus.OK};
   }
 }

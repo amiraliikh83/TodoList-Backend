@@ -22,7 +22,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiResponse({ status: 200, description: 'User successfully logged in.' })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
-  async login(@Body() loginUserDto: LoginUserDto): Promise<{ accessToken: string }> {
+  async login(@Body() loginUserDto: LoginUserDto): Promise<{ accessToken: string , statusCode : number }> {
     return this.authService.login(loginUserDto);
   }
 }
