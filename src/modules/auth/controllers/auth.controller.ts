@@ -12,8 +12,8 @@ export class AuthController {
   @HttpCode(HttpStatus.CREATED)
   @ApiResponse({ status: 201, description: 'User successfully registered.' })
   @ApiResponse({ status: 400, description: 'Bad Request.' })
-  async register(@Body() createUserDto: CreateUserDto): Promise<{ message: string }> {
+  async register(@Body() createUserDto: CreateUserDto): Promise<{ message: string  , statusCode : number}> {
     await this.authService.register(createUserDto);
-    return { message: 'User registered successfully.' };
+    return { message: 'User registered successfully.' , statusCode : HttpStatus.CREATED  };
   }
 }
