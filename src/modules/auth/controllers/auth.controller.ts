@@ -1,8 +1,8 @@
-import { Body, Controller, Post, HttpCode, HttpStatus } from '@nestjs/common';
+import { Body, Controller, Post, HttpCode, HttpStatus, Get, UseGuards } from '@nestjs/common';
 import { AuthService } from '../services/auth.service';
 import { CreateUserDto } from '../../dto/create-user.dto';
 import { LoginUserDto } from '../../dto/login-user.dto';
-import { ApiTags, ApiResponse } from '@nestjs/swagger';
+import { ApiTags, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -32,4 +32,13 @@ export class AuthController {
   ): Promise<{ accessToken: string; statusCode: number }> {
     return this.authService.login(loginUserDto);
   }
+  @UseGuards(JwtAuthGuard)
+  @Get('validate-token')
+  @ApiBearerAuth() // برای Swagger که نیاز به وارد کردن توکن باشد
+  @ApiResponse({ status: 200, description: 'Token is valid.' })
+  @ApiResponse({ status: 401, description: 'Unauthorized.' })
+  validateToken(@Request() req): { message: string; user: any } {
+    return { message: 'Token is valid.', user: req.user };
+  }
+}
 }
