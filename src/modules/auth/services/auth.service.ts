@@ -1,4 +1,9 @@
-import { Injectable, BadRequestException, UnauthorizedException, HttpStatus } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  UnauthorizedException,
+  HttpStatus,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User, UserDocument } from '../../schemas/user.schema';
@@ -15,7 +20,9 @@ export class AuthService {
   ) {}
 
   async register(createUserDto: CreateUserDto): Promise<void> {
-    const existingUser = await this.userModel.findOne({ username: createUserDto.username });
+    const existingUser = await this.userModel.findOne({
+      username: createUserDto.username,
+    });
     if (existingUser) {
       throw new BadRequestException('Username is already taken');
     }
@@ -29,13 +36,20 @@ export class AuthService {
     await newUser.save();
   }
 
-  async login(loginUserDto: LoginUserDto): Promise<{ accessToken: string  , statusCode : number}> {
-    const user = await this.userModel.findOne({ username: loginUserDto.username });
+  async login(
+    loginUserDto: LoginUserDto,
+  ): Promise<{ accessToken: string; statusCode: number }> {
+    const user = await this.userModel.findOne({
+      username: loginUserDto.username,
+    });
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const isPasswordValid = await bcrypt.compare(loginUserDto.password, user.password);
+    const isPasswordValid = await bcrypt.compare(
+      loginUserDto.password,
+      user.password,
+    );
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid credentials');
     }
@@ -43,6 +57,6 @@ export class AuthService {
     const payload = { username: user.username, sub: user._id };
     const accessToken = this.jwtService.sign(payload);
 
-    return { accessToken  , statusCode : HttpStatus.OK};
+    return { accessToken, statusCode: HttpStatus.OK };
   }
 }
