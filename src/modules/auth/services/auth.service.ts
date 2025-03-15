@@ -21,7 +21,7 @@ export class AuthService {
 
   async register(createUserDto: CreateUserDto): Promise<void> {
     const existingUser = await this.userModel.findOne({
-      username: createUserDto.username,
+      userEmail: createUserDto.userEmail,
     });
     if (existingUser) {
       throw new BadRequestException('Username is already taken');
@@ -29,7 +29,8 @@ export class AuthService {
 
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
     const newUser = new this.userModel({
-      username: createUserDto.username,
+      userName: createUserDto.userName,
+      userEmail: createUserDto.userEmail,
       password: hashedPassword,
     });
 
@@ -40,7 +41,7 @@ export class AuthService {
     loginUserDto: LoginUserDto,
   ): Promise<{ accessToken: string; statusCode: number }> {
     const user = await this.userModel.findOne({
-      username: loginUserDto.username,
+      email: loginUserDto.username,
     });
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
@@ -54,7 +55,7 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const payload = { username: user.username, sub: user._id };
+    const payload = { email: user.userEmail, sub: user._id };
     const accessToken = this.jwtService.sign(payload);
 
     return { accessToken, statusCode: HttpStatus.OK };

@@ -5,6 +5,7 @@ import { AuthController } from './controllers/auth.controller';
 import { User, UserSchema } from '../schemas/user.schema';
 import { JwtModule } from '@nestjs/jwt';
 import * as dotenv from 'dotenv';
+
 dotenv.config();
 
 @Module({
