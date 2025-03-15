@@ -41,7 +41,7 @@ export class AuthService {
     loginUserDto: LoginUserDto,
   ): Promise<{ accessToken: string; statusCode: number }> {
     const user = await this.userModel.findOne({
-      email: loginUserDto.username,
+      userEmail: loginUserDto.userEmail,
     });
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
