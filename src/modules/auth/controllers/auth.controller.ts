@@ -44,10 +44,18 @@ export class AuthController {
   }
   @UseGuards(JwtAuthGuard)
   @Get('validate-token')
-  @ApiBearerAuth() // برای Swagger که نیاز به وارد کردن توکن باشد
+  @ApiBearerAuth()
   @ApiResponse({ status: 200, description: 'Token is valid.' })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
-  validateToken(@Request() req): { message: string; user: any } {
-    return { message: 'Token is valid.', user: req.user };
+  validateToken(@Request() req): {
+    message: string;
+    user: any;
+    statusCode: number;
+  } {
+    return {
+      message: 'Token is valid.',
+      user: req.user.username,
+      statusCode: HttpStatus.OK,
+    };
   }
 }
