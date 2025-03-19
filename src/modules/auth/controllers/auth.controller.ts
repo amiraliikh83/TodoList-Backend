@@ -9,6 +9,7 @@ import {
   Request,
   Query,
   Res,
+  Redirect,
 } from '@nestjs/common';
 import { AuthService } from '../services/auth.service';
 import { CreateUserDto } from '../../dto/create-user.dto';
@@ -70,15 +71,9 @@ export class AuthController {
   }
 
   @Get('reset-password')
+  @Redirect('/public/reset-password.html')
   getResetPasswordPage(@Query('token') token: string, @Res() res: Response) {
-    const filePath = path.join(
-      __dirname,
-      '..',
-      '..',
-      'public',
-      'reset-password.html',
-    );
-    res.sendFile(filePath);
+    return;
   }
 
   @Post('reset-password-submit')
