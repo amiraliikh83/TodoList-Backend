@@ -10,6 +10,7 @@ import {
   Query,
   Res,
   Redirect,
+  BadRequestException,
 } from '@nestjs/common';
 import { AuthService } from '../services/auth.service';
 import { CreateUserDto } from '../../dto/create-user.dto';
@@ -45,6 +46,12 @@ export class AuthController {
   async login(
     @Body() loginUserDto: LoginUserDto,
   ): Promise<{ accessToken: string; statusCode: number }> {
+    console.log('Received login request:', loginUserDto);
+
+    if (!loginUserDto.password) {
+      throw new BadRequestException('Password is required');
+    }
+
     return this.authService.login(loginUserDto);
   }
   @UseGuards(JwtAuthGuard)

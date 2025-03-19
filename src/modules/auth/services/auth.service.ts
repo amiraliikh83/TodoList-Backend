@@ -46,14 +46,24 @@ export class AuthService {
     const user = await this.userModel.findOne({
       userEmail: loginUserDto.userEmail,
     });
+
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
+    }
+
+    if (!loginUserDto.password) {
+      throw new BadRequestException('Password is required');
+    }
+
+    if (!user.password) {
+      throw new UnauthorizedException('User has no password set');
     }
 
     const isPasswordValid = await bcrypt.compare(
       loginUserDto.password,
       user.password,
     );
+
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid credentials');
     }
@@ -65,25 +75,21 @@ export class AuthService {
   }
 
   async forgotPassword(Email: string): Promise<{ message: string }> {
-    // Find user by CodeMeli
     const user = await this.userModel.findOne({ Email: Email });
     if (!user) {
       throw new NotFoundException('User with this CodeMeli not found');
     }
 
-    // Generate reset token
     const token = crypto.randomBytes(32).toString('hex');
     const expiryDate = new Date();
-    expiryDate.setHours(expiryDate.getHours() + 1); // Token valid for 1 hour
+    expiryDate.setHours(expiryDate.getHours() + 1);
 
-    // Store token in database
     user.resetToken = token;
     user.resetTokenExpiry = expiryDate;
     await user.save();
 
     console.log('Reset token stored in database, sending email.');
 
-    // Send reset email
     await this.sendResetEmail(user.userEmail, token);
 
     return { message: 'Password reset link sent to email' };
@@ -93,18 +99,15 @@ export class AuthService {
     token: string,
     newPassword: string,
   ): Promise<{ message: string }> {
-    // Find user by reset token
     const user = await this.userModel.findOne({ resetToken: token });
 
     if (!user || !user.resetTokenExpiry || new Date() > user.resetTokenExpiry) {
       throw new BadRequestException('Invalid or expired reset token');
     }
 
-    // Hash new password
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     user.password = hashedPassword;
 
-    // Clear reset token
     user.resetToken = null;
     user.resetTokenExpiry = null;
     await user.save();
