@@ -1,18 +1,21 @@
 import {
   Injectable,
   BadRequestException,
+  NotFoundException,
   UnauthorizedException,
+  HttpException,
   HttpStatus,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User, UserDocument } from '../../schemas/user.schema';
-import { CreateUserDto } from '../../dto/create-user.dto';
-import { LoginUserDto } from '../../dto/login-user.dto';
 import * as bcrypt from 'bcrypt';
+import * as crypto from 'crypto';
+import * as nodemailer from 'nodemailer';
 import { JwtService } from '@nestjs/jwt';
+import { CreateUserDto } from 'src/modules/dto/create-user.dto';
+import { LoginUserDto } from 'src/modules/dto/login-user.dto';
 
-@Injectable()
 export class AuthService {
   constructor(
     @InjectModel(User.name) private userModel: Model<UserDocument>,
@@ -59,5 +62,73 @@ export class AuthService {
     const accessToken = this.jwtService.sign(payload);
 
     return { accessToken, statusCode: HttpStatus.OK };
+  }
+
+  async forgotPassword(Email: string): Promise<{ message: string }> {
+    // Find user by CodeMeli
+    const user = await this.userModel.findOne({ Email: Email });
+    if (!user) {
+      throw new NotFoundException('User with this CodeMeli not found');
+    }
+
+    // Generate reset token
+    const token = crypto.randomBytes(32).toString('hex');
+    const expiryDate = new Date();
+    expiryDate.setHours(expiryDate.getHours() + 1); // Token valid for 1 hour
+
+    // Store token in database
+    user.resetToken = token;
+    user.resetTokenExpiry = expiryDate;
+    await user.save();
+
+    console.log('Reset token stored in database, sending email.');
+
+    // Send reset email
+    await this.sendResetEmail(user.userEmail, token);
+
+    return { message: 'Password reset link sent to email' };
+  }
+
+  async resetPassword(
+    token: string,
+    newPassword: string,
+  ): Promise<{ message: string }> {
+    // Find user by reset token
+    const user = await this.userModel.findOne({ resetToken: token });
+
+    if (!user || !user.resetTokenExpiry || new Date() > user.resetTokenExpiry) {
+      throw new BadRequestException('Invalid or expired reset token');
+    }
+
+    // Hash new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+
+    // Clear reset token
+    user.resetToken = null;
+    user.resetTokenExpiry = null;
+    await user.save();
+
+    return { message: 'Password successfully reset' };
+  }
+
+  private async sendResetEmail(email: string, token: string) {
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+
+    const resetLink = `http://localhost:3000/reset-password?token=${token}`;
+
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: 'Password Reset',
+      html: `<p>You requested a password reset. Click the link below:</p>
+             <p><a href="${resetLink}">${resetLink}</a></p>`,
+    });
   }
 }

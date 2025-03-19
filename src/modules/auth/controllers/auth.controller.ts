@@ -7,12 +7,16 @@ import {
   Get,
   UseGuards,
   Request,
+  Query,
+  Res,
 } from '@nestjs/common';
 import { AuthService } from '../services/auth.service';
 import { CreateUserDto } from '../../dto/create-user.dto';
 import { LoginUserDto } from '../../dto/login-user.dto';
 import { ApiTags, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/modules/Guard/JwtAuthGuard';
+import path from 'path';
+import { Response } from 'express';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -57,5 +61,33 @@ export class AuthController {
       user: req.user.username,
       statusCode: HttpStatus.OK,
     };
+  }
+  @Post('forgot-password')
+  @HttpCode(HttpStatus.OK)
+  @ApiResponse({ status: 200, description: 'Password reset email sent.' })
+  async forgotPassword(@Body('Email') Email: string) {
+    return this.authService.forgotPassword(Email);
+  }
+
+  @Get('reset-password')
+  getResetPasswordPage(@Query('token') token: string, @Res() res: Response) {
+    const filePath = path.join(
+      __dirname,
+      '..',
+      '..',
+      'public',
+      'reset-password.html',
+    );
+    res.sendFile(filePath);
+  }
+
+  @Post('reset-password-submit')
+  @HttpCode(HttpStatus.OK)
+  @ApiResponse({ status: 200, description: 'Password successfully reset.' })
+  async resetPassword(
+    @Body('token') token: string,
+    @Body('newPassword') newPassword: string,
+  ) {
+    return this.authService.resetPassword(token, newPassword);
   }
 }
