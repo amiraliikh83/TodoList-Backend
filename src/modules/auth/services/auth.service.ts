@@ -75,7 +75,7 @@ export class AuthService {
   }
 
   async forgotPassword(Email: string): Promise<{ message: string }> {
-    const user = await this.userModel.findOne({ Email: Email });
+    const user = await this.userModel.findOne({ userEmail: Email });
     if (!user) {
       throw new NotFoundException('User with this CodeMeli not found');
     }
@@ -124,7 +124,7 @@ export class AuthService {
       },
     });
 
-    const resetLink = `http://localhost:3000/reset-password?token=${token}`;
+    const resetLink = `http://localhost:3000/auth/reset-password?token=${token}`;
 
     await transporter.sendMail({
       from: process.env.EMAIL_USER,
