@@ -16,11 +16,7 @@ export class JwtAuthGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     const authorizationHeader = request.headers.authorization;
 
-    if (!authorizationHeader || !authorizationHeader.startsWith('Bearer ')) {
-      throw new ForbiddenException('No token provided or invalid format');
-    }
-
-    const token = authorizationHeader.split(' ')[1];
+    const token = authorizationHeader;
 
     try {
       const decoded = this.jwtService.verify(token, {
