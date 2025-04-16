@@ -17,8 +17,6 @@ import { CreateUserDto } from '../../dto/create-user.dto';
 import { LoginUserDto } from '../../dto/login-user.dto';
 import { ApiTags, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/modules/Guard/JwtAuthGuard';
-import path from 'path';
-import { Response } from 'express';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -78,9 +76,12 @@ export class AuthController {
   }
 
   @Get('reset-password')
-  @Redirect('/public/reset-password.html')
-  getResetPasswordPage(@Query('token') token: string, @Res() res: Response) {
-    return;
+  @Redirect()
+  getResetPasswordPage(@Query('token') token: string) {
+    return {
+      url: `/public/reset-password.html?token=${token}`,
+      statusCode: 302,
+    };
   }
 
   @Post('reset-password-submit')

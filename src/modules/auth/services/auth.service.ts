@@ -42,7 +42,8 @@ export class AuthService {
 
   async login(
     loginUserDto: LoginUserDto,
-  ): Promise<{ accessToken: string; statusCode: number }> {
+  ): Promise<{ accessToken: string; statusCode: number; message: string }> {
+    
     const user = await this.userModel.findOne({
       userEmail: loginUserDto.userEmail,
     });
@@ -71,10 +72,16 @@ export class AuthService {
     const payload = { email: user.userEmail, sub: user._id };
     const accessToken = this.jwtService.sign(payload);
 
-    return { accessToken, statusCode: HttpStatus.OK };
+    return {
+      accessToken,
+      statusCode: HttpStatus.OK,
+      message: 'Login Successfully',
+    };
   }
 
-  async forgotPassword(Email: string): Promise<{ message: string }> {
+  async forgotPassword(
+    Email: string,
+  ): Promise<{ message: string; statusCode: number }> {
     const user = await this.userModel.findOne({ userEmail: Email });
     if (!user) {
       throw new NotFoundException('User with this CodeMeli not found');
@@ -92,7 +99,10 @@ export class AuthService {
 
     await this.sendResetEmail(user.userEmail, token);
 
-    return { message: 'Password reset link sent to email' };
+    return {
+      message: 'Reset link sent. Check your email.',
+      statusCode: HttpStatus.OK,
+    };
   }
 
   async resetPassword(
@@ -124,7 +134,7 @@ export class AuthService {
       },
     });
 
-    const resetLink = `http://localhost:3000/auth/reset-password?token=${token}`;
+    const resetLink = `http://192.168.137.1:3000/auth/reset-password?token=${token}`;
 
     await transporter.sendMail({
       from: process.env.EMAIL_USER,
