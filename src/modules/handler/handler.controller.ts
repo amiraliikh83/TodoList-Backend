@@ -1,20 +1,37 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Request,
+  UseGuards,
+} from '@nestjs/common';
 import { CreateTaskDto } from '../DTO/create-task.dto';
 import { HandlerService } from './handler.service';
 import { UpdateTaskDto } from '../DTO/update-task.dto';
+import { AuthGuard } from '@nestjs/passport';
+import { JwtAuthGuard } from '../Guard/JwtAuthGuard';
 
-@Controller('handler')
+@Controller('task')
 export class HandlerController {
   constructor(private readonly handlerService: HandlerService) {}
 
-  @Post()
-  create(@Body() createTaskDto: CreateTaskDto) {
-    return this.handlerService.create(createTaskDto);
+  @Post('c')
+  @UseGuards(JwtAuthGuard)
+  create(@Request() req, @Body() createTaskDto: CreateTaskDto) {
+    return this.handlerService.create({
+      ...createTaskDto,
+      user: req.user.sub,
+    });
   }
 
-  @Get()
-  findAll() {
-    return this.handlerService.findAll();
+  @Get('d')
+  @UseGuards(JwtAuthGuard)
+  findAll(@Request() req) {
+    return this.handlerService.findAll(req.user.sub);
   }
 
   @Get(':id')

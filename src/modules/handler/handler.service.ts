@@ -14,8 +14,8 @@ export class HandlerService {
     return createdTask.save();
   }
 
-  async findAll(): Promise<Task[]> {
-    return this.taskModel.find().exec();
+  async findAll(userId: string): Promise<Task[]> {
+    return this.taskModel.find({ user: userId }).exec(); 
   }
 
   async findOne(id: string): Promise<Task> {
