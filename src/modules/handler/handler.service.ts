@@ -1,10 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { UpdateTaskDto } from '../DTO/update-task.dto';
-import { Task } from '../DTO/task';
 import { CreateTaskDto } from '../DTO/create-task.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { TaskDocument } from '../schemas/task.schema';
+import { Task, TaskDocument } from '../schemas/task.schema';
 
 @Injectable()
 export class HandlerService {
