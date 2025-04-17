@@ -4,7 +4,7 @@ import { Task } from '../DTO/task';
 import { CreateTaskDto } from '../DTO/create-task.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-export type TaskDocument = Task & Document;
+import { TaskDocument } from '../schemas/task.schema';
 
 @Injectable()
 export class HandlerService {
