@@ -1,4 +1,10 @@
-import { IsString, IsNotEmpty, IsDate, IsEnum, IsNumber } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsDate,
+  IsEnum,
+  IsNumber,
+} from 'class-validator';
 
 export class CreateTaskDto {
   @IsString()
@@ -17,9 +23,8 @@ export class CreateTaskDto {
   @IsNumber()
   level: number;
 
-  @IsEnum(['todo', 'doing', 'done'])
-  status: 'todo' | 'doing' | 'done';
-
+  @IsEnum(['todo', 'done'])
+  status: 'todo' | 'done';
 
   @IsString()
   user: string;
