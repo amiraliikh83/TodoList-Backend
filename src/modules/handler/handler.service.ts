@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { UpdateTaskDto } from '../DTO/update-task.dto';
 import { CreateTaskDto } from '../DTO/create-task.dto';
 import { InjectModel } from '@nestjs/mongoose';
@@ -15,7 +15,7 @@ export class HandlerService {
   }
 
   async findAll(userId: string): Promise<Task[]> {
-    return this.taskModel.find({ user: userId }).exec(); 
+    return this.taskModel.find({ user: userId }).exec();
   }
 
   async findOne(id: string): Promise<Task> {
@@ -32,8 +32,14 @@ export class HandlerService {
     return updated;
   }
 
-  async remove(id: string): Promise<void> {
+  async remove(id: string): Promise<any> {
     const result = await this.taskModel.findByIdAndDelete(id).exec();
     if (!result) throw new NotFoundException('Task not found');
+    if (result) {
+      return {
+        statusCode: HttpStatus.OK,
+        Message: 'Deleted Successfully',
+      };
+    }
   }
 }
