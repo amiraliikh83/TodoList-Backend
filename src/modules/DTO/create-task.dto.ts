@@ -9,7 +9,7 @@ export class CreateTaskDto {
   projectName: string;
 
   @IsString()
-  date: string;
+  days: string;
 
   @IsEnum(['Low', 'Medium', 'High'])
   priority: 'Low' | 'Medium' | 'High';

@@ -4,5 +4,5 @@ export class UpdateTaskDto {
   readonly date?: Date;
   readonly priority?: 'low' | 'medium' | 'high';
   readonly level?: number;
-  readonly status?: 'todo' | 'doing' | 'done';
+  readonly status?: 'todo' | 'done';
 }

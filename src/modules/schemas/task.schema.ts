@@ -7,10 +7,10 @@ export type TaskDocument = Task & Document;
 export class Task {
   @Prop() title: string;
   @Prop() projectName: string;
-  @Prop() date: string;
+  @Prop() days: string;
   @Prop() priority: string;
   @Prop() level: string;
-  @Prop() status: boolean;
+  @Prop() status: string;
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true })
   user: mongoose.Types.ObjectId;
