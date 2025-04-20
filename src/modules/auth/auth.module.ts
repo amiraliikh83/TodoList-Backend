@@ -6,8 +6,7 @@ import { User, UserSchema } from '../schemas/user.schema';
 import { JwtModule } from '@nestjs/jwt';
 import * as dotenv from 'dotenv';
 import { PassportModule } from '@nestjs/passport';
-import { GoogleStrategy } from './strategies/google.strategy';
-import { JwtStrategy } from '../Guard/jwt.strategy';
+import { GoogleStrategy } from '../Guard/google.strategy';
 
 dotenv.config();
 
@@ -21,7 +20,7 @@ dotenv.config();
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, GoogleStrategy, JwtStrategy],
+  providers: [AuthService, GoogleStrategy],
   exports: [JwtModule],
 })
 export class AuthModule {}

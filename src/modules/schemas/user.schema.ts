@@ -18,6 +18,9 @@ export class User {
 
   @Prop()
   resetTokenExpiry?: Date;
+
+  @Prop({ required: false })
+  jwtToken?: string; // می‌توانید این ویژگی را اختیاری کنید
 }
 
 export type UserDocument = User & Document;

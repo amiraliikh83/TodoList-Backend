@@ -12,7 +12,6 @@ import {
   Redirect,
   BadRequestException,
   Req,
-  NotFoundException,
 } from '@nestjs/common';
 import { AuthService } from '../services/auth.service';
 import { CreateUserDto } from '../../dto/create-user.dto';
@@ -20,16 +19,11 @@ import { LoginUserDto } from '../../dto/login-user.dto';
 import { ApiTags, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/modules/Guard/JwtAuthGuard';
 import { AuthGuard } from '@nestjs/passport';
-import { Response } from 'express';
-import { JwtService } from '@nestjs/jwt';
 
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
-  constructor(
-    private readonly authService: AuthService,
-    private jwtService: JwtService,
-  ) {}
+  constructor(private readonly authService: AuthService) {}
 
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
@@ -62,25 +56,15 @@ export class AuthController {
   }
   @Get('google')
   @UseGuards(AuthGuard('google'))
-  async googleAuth(@Req() req) {}
+  async googleAuth(@Req() req) {
+    // رد می‌کنه به گوگل
+  }
 
   @Get('google/redirect')
   @UseGuards(AuthGuard('google'))
-  async googleAuthRedirect(@Req() req, @Res() res: Response) {
-    const googleUser = req.user;
-
-    const user = await this.authService.findByEmail(googleUser.email); // این تابع باید باشه
-
-    if (!user) {
-      return res
-        .status(403)
-        .json({ message: 'اکانتی با این ایمیل وجود نداره!' });
-    }
-
-    const payload = { sub: user._id, email: user.userEmail };
-    const token = this.jwtService.sign(payload);
-
-    return res.json({ token });
+  googleAuthRedirect(@Req() req) {
+    // کاربر احراز شده اینجاست
+    return req.user;
   }
   @UseGuards(JwtAuthGuard)
   @Get('validate-token')
