@@ -43,7 +43,6 @@ export class AuthService {
   async login(
     loginUserDto: LoginUserDto,
   ): Promise<{ accessToken: string; statusCode: number; message: string }> {
-    
     const user = await this.userModel.findOne({
       userEmail: loginUserDto.userEmail,
     });
@@ -77,6 +76,29 @@ export class AuthService {
       statusCode: HttpStatus.OK,
       message: 'Login Successfully',
     };
+  }
+
+  async findByEmail(email: string) {
+    return this.userModel.findOne({ email });
+  }
+  async googleAuthUser(googleUser: any): Promise<any> {
+    const existingUser = await this.userModel.findOne({
+      userEmail: googleUser.email,
+    });
+
+    if (!existingUser) {
+      // اگر کاربر جدید بود، ثبت‌نام کنیم
+      const newUser = new this.userModel({
+        userEmail: googleUser.email,
+        userName: googleUser.firstName + ' ' + googleUser.lastName, // می‌تونید نام کاربری را هم از گوگل بگیرید
+      });
+
+      await newUser.save();
+
+      return { user: newUser, isNewUser: true };
+    }
+
+    return { user: existingUser, isNewUser: false };
   }
 
   async forgotPassword(
