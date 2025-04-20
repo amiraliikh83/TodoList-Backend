@@ -19,6 +19,7 @@ import { LoginUserDto } from '../../dto/login-user.dto';
 import { ApiTags, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/modules/Guard/JwtAuthGuard';
 import { AuthGuard } from '@nestjs/passport';
+import { VerifyCodeDto } from 'src/modules/DTO/verify-code.dto';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -26,17 +27,21 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('register')
-  @HttpCode(HttpStatus.CREATED)
-  @ApiResponse({ status: 201, description: 'User successfully registered.' })
-  @ApiResponse({ status: 400, description: 'Bad Request.' })
-  async register(
-    @Body() createUserDto: CreateUserDto,
-  ): Promise<{ message: string; statusCode: number }> {
-    await this.authService.register(createUserDto);
+  async startRegister(@Body() dto: CreateUserDto) {
+    await this.authService.startRegistration(dto);
     return {
-      message: 'User registered successfully.',
-      statusCode: HttpStatus.CREATED,
+      message: 'Verification code sent to your email',
+      statusCode: HttpStatus.OK,
     };
+  }
+
+  @Post('confirm')
+  async confirm(@Body() body: { userEmail: string; code: string }) {
+    await this.authService.confirmRegistration(body.userEmail, body.code);
+    return {
+      message: 'Account created successfully',
+      statusCode: HttpStatus.CREATED,
+      };
   }
 
   @Post('login')

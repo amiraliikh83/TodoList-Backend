@@ -1,9 +1,7 @@
 import {
-  Injectable,
   BadRequestException,
   NotFoundException,
   UnauthorizedException,
-  HttpException,
   HttpStatus,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
@@ -15,35 +13,75 @@ import * as nodemailer from 'nodemailer';
 import { JwtService } from '@nestjs/jwt';
 import { CreateUserDto } from 'src/modules/dto/create-user.dto';
 import { LoginUserDto } from 'src/modules/dto/login-user.dto';
+import { PendingUser } from '../../schemas/verify.schema';
+import { MailService } from './mail.service';
 
 export class AuthService {
   constructor(
     @InjectModel(User.name) private userModel: Model<UserDocument>,
+    @InjectModel(PendingUser.name) private pendingUserModel: Model<PendingUser>,
+    private mailService: MailService, // اضافه کن
     private jwtService: JwtService,
   ) {}
 
-  async register(createUserDto: CreateUserDto): Promise<void> {
+  async startRegistration(dto: CreateUserDto): Promise<void> {
     const existingUser = await this.userModel.findOne({
-      userEmail: createUserDto.userEmail,
+      userEmail: dto.userEmail,
     });
     if (existingUser) {
-      throw new BadRequestException('Username is already taken');
+      throw new BadRequestException('User already exists');
     }
 
-    const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    const password = await bcrypt.hash(dto.password, 10);
+
+    // ذخیره موقت
+    await this.pendingUserModel.findOneAndUpdate(
+      { userEmail: dto.userEmail },
+      {
+        userEmail: dto.userEmail,
+        userName: dto.userName,
+        password,
+        code: code,
+        expiresAt: Date.now() + 5 * 60 * 1000,
+      },
+      { upsert: true },
+    );
+
+    // ایمیل کد
+    await this.mailService.sendEmail({
+      to: dto.userEmail,
+      subject: 'Verify your email',
+      text: `Your code is: ${code}`,
+    });
+  }
+
+  async confirmRegistration(userEmail: string, code: string): Promise<void> {
+    const pending = await this.pendingUserModel.findOne({
+      userEmail,
+      code: code,
+    });
+
+    if (!pending || pending.expiresAt < Date.now()) {
+      throw new BadRequestException('Invalid or expired code');
+    }
+
+    // ساخت یوزر نهایی
     const newUser = new this.userModel({
-      userName: createUserDto.userName,
-      userEmail: createUserDto.userEmail,
-      password: hashedPassword,
+      userEmail: userEmail,
+      userName: pending.userName,
+      password: pending.password,
     });
 
     await newUser.save();
+
+    // حذف از pending
+    await this.pendingUserModel.deleteOne({ userEmail });
   }
 
   async login(
     loginUserDto: LoginUserDto,
   ): Promise<{ accessToken: string; statusCode: number; message: string }> {
-    
     const user = await this.userModel.findOne({
       userEmail: loginUserDto.userEmail,
     });
