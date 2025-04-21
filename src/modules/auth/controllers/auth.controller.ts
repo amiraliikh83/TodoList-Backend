@@ -41,7 +41,7 @@ export class AuthController {
     return {
       message: 'Account created successfully',
       statusCode: HttpStatus.CREATED,
-      };
+    };
   }
 
   @Post('login')
