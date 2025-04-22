@@ -46,7 +46,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
         userEmail: email,
         password: hashedPassword,
         profilePicture: photos?.[0]?.value, // اختیاری
-        isGoogleUser: true, // پرچم برای گوگل
+        isGoogleUser: true, // پرچم برای گوگلf
       });
 
       // ارسال ایمیل با رمز عبور تصادفی
