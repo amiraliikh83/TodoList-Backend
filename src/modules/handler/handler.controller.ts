@@ -13,9 +13,7 @@ import {
 import { CreateTaskDto } from '../DTO/create-task.dto';
 import { HandlerService } from './handler.service';
 import { UpdateTaskDto } from '../DTO/update-task.dto';
-import { AuthGuard } from '@nestjs/passport';
 import { JwtAuthGuard } from '../Guard/JwtAuthGuard';
-import path from 'path';
 
 @Controller('task')
 export class HandlerController {
