@@ -32,11 +32,14 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     const { name, emails, photos } = profile;
     const email = emails[0].value;
 
+    let isNewUser = false;
+
     let user = await this.userModel.findOne({ userEmail: email });
 
     if (!user) {
-      // اگر کاربر وجود نداشت، اکانت بساز
-      const randomPassword = Math.random().toString(36).slice(-8); // پسورد تصادفی
+      isNewUser = true;
+
+      const randomPassword = Math.random().toString(36).slice(-8);
       const hashedPassword = await import('bcrypt').then((bcrypt) =>
         bcrypt.hash(randomPassword, 10),
       );
@@ -45,22 +48,21 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
         userName: name?.givenName || email.split('@')[0],
         userEmail: email,
         password: hashedPassword,
-        profilePicture: photos?.[0]?.value, // اختیاری
-        isGoogleUser: true, // پرچم برای گوگلf
+        profilePicture: photos?.[0]?.value,
+        isGoogleUser: true,
       });
 
-      // ارسال ایمیل با رمز عبور تصادفی
       await this.mailService.sendEmail({
-        from: 'TaskOra', // ایمیل شما
-        to: email, // ایمیل کاربر
-        subject: 'Your new account details',
-        text: `Your account has been created successfully! Here is your temporary password: ${randomPassword}`,
+        from: 'TaskOra',
+        to: email,
+        subject: 'Welcome to TaskOra!',
+        text: `سلام ${user.userName} عزیز 🌟\n\nاکانت شما با موفقیت ساخته شد.\nرمز عبور موقت شما: ${randomPassword}\n\nمی‌تونی بعداً وارد حساب بشی و اون رو تغییر بدی.`,
       } as any);
     }
 
     const payload = { email: user.userEmail, sub: user._id };
     const jwtToken = this.jwtService.sign(payload);
 
-    done(null, { ...user.toObject(), jwtToken });
+    done(null, { ...user.toObject(), jwtToken, isNewUser });
   }
 }

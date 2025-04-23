@@ -71,8 +71,8 @@ export class AuthController {
     // کاربر احراز شده اینجاست
     return req.user;
   }
-  @UseGuards(JwtAuthGuard)
   @Get('validate-token')
+  @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiResponse({ status: 200, description: 'Token is valid.' })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })

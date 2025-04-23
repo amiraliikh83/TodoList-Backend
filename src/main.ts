@@ -5,7 +5,12 @@ import * as path from 'path';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.enableCors();
+  app.enableCors({
+    origin: '*', // این اجازه میده به تمام دامنه‌ها دسترسی داشته باشن
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
+  });
 
   app.use('/public', express.static(path.join(__dirname, '..', 'public')));
 
